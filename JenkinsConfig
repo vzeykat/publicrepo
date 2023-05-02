@@ -1,2 +1,41 @@
-aws codeartifact get-authorization-token
-afsdgd
+@Library('jenkins-shared-libraries') _
+pipeline {
+    agent {
+        label 'windows'
+    }
+    environment {
+        SONAR_KEY = ""
+    }
+    stages {
+        stage('Develop') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    utilities.copyResourceToWorkspace('NuGet.Config')
+                }
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: "webAppsNoProdUser", accessKeyVariable: 'AWS_ACCESS_KEY_ID', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY' ]]) {
+                    powershell '''
+                    $resp = aws codeartifact get-authorization-token --domain bkn301-backend --output text
+                    $Token = $resp -split "\t"
+                    dotnet nuget update source bkn301-backend/common --store-password-in-clear-text -p $Token[0] -u aws --configfile ${ENV:WORKSPACE}/NuGet.Config
+                    '''
+                }
+                powershell '''
+                $ProjectPath = (Get-ChildItem -Filter *.sln -Recurse).Fullname | Split-Path
+                Set-Location -Path $ProjectPath
+				$TAG = git tag --contains
+				$Env:BUILD_VERSION = $TAG.Substring(2)
+				echo $TAG
+				$Env:BUILD_VERSION
+                ##dotnet build --configuration Debug
+                ##dotnet pack --no-build --configuration Debug --output NugetArtifactFolder
+                ##$NupkgFolderName = (Get-Location).Path + "\\NugetArtifactFolder"
+                ##$NupkgPath = $NupkgFolderName + "\\" + (Get-ChildItem -Path $NupkgFolderName).Name
+                #dotnet nuget push $NupkgPath --source bkn301-backend/common --skip-duplicate
+                '''
+            }
+        }
+    }
+}
