@@ -4,7 +4,7 @@ pipeline {
         label 'windows'
     }
     environment {
-        SONAR_KEY = ""
+        SONAR_KEY = """${powershell( returnStdout: true, script: 'git tag --contains')}"""
     }
     stages {
         stage('Develop') {
@@ -13,6 +13,7 @@ pipeline {
             }
             steps {
                 powershell '''
+		echo $SONAR_KEY
 		echo git tag --contains
 		git tag --contains
 		$TAG=$(git tag --contains)
