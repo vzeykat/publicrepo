@@ -23,7 +23,7 @@ pipeline {
 		echo $Env:BUILD_VERSION
                 ##dotnet build --configuration Debug
                 ##dotnet pack --no-build --configuration Debug --output NugetArtifactFolder
-                ##$NupkgFolderName = (Get-Location).Path + "\\NugetArtifactFolder"
+                ####$NupkgFolderName = (Get-Location).Path + "\\NugetArtifactFolder"
                 ##$NupkgPath = $NupkgFolderName + "\\" + (Get-ChildItem -Path $NupkgFolderName).Name
                 #dotnet nuget push $NupkgPath --source bkn301-backend/common --skip-duplicate
                 '''
@@ -31,5 +31,6 @@ pipeline {
         }
     }
 }
+
 
 
