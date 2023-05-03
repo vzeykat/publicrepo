@@ -16,6 +16,7 @@ pipeline {
                     utilities.copyResourceToWorkspace('NuGet.Config')
                 }
                 powershell '''
+		git tag --contains
 		$TAG=$(git tag --contains)
 		$Env:BUILD_VERSION = "HelloVijay"
 		echo $TAG
